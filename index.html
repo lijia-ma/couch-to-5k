@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Couch to 5K</title>
+  <style>
+    :root {
+      --text: #f7f8fb;
+      --muted: rgba(247,248,251,.68);
+      --panel: rgba(255,255,255,.08);
+      --panel-strong: rgba(255,255,255,.12);
+      --border: rgba(255,255,255,.10);
+      --card-border: rgba(255,255,255,.08);
+      --body-a: rgba(80,140,255,.18);
+      --body-b: rgba(95,220,170,.14);
+      --body-c1: #0b1020;
+      --body-c2: #11172a;
+      --body-c3: #0c1223;
+      --app-bg: rgba(11,16,32,.72);
+      --shadow: 0 24px 80px rgba(0,0,0,.35);
+      --primary-bg: #f7f8fb;
+      --primary-text: #0c1223;
+    }
+
+    :root[data-theme="light"] {
+      --text: #152033;
+      --muted: rgba(21,32,51,.64);
+      --panel: rgba(20,35,60,.06);
+      --panel-strong: rgba(20,35,60,.10);
+      --border: rgba(30,50,80,.10);
+      --card-border: rgba(30,50,80,.08);
+      --body-a: rgba(93,151,221,.18);
+      --body-b: rgba(107,190,147,.15);
+      --body-c1: #f7f9fc;
+      --body-c2: #eef3f8;
+      --body-c3: #f9fbfd;
+      --app-bg: rgba(255,255,255,.78);
+      --shadow: 0 24px 70px rgba(35,55,85,.16);
+      --primary-bg: #152033;
+      --primary-text: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 15%, var(--body-a), transparent 30%),
+        radial-gradient(circle at 85% 20%, var(--body-b), transparent 28%),
+        linear-gradient(160deg, var(--body-c1) 0%, var(--body-c2) 55%, var(--body-c3) 100%);
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(920px, 100%);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      background: var(--app-bg);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      padding: clamp(24px, 4vw, 42px);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 34px;
+    }
+
+    .title {
+      font-size: clamp(34px, 6vw, 62px);
+      line-height: 1;
+      letter-spacing: -.04em;
+      font-weight: 800;
+      margin: 0 0 10px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .theme-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .theme-picker select {
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 7px 10px;
+      font: inherit;
+      font-size: 13px;
+    }
+
+    :root[data-theme="light"] .theme-picker select {
+      background: rgba(255,255,255,.9);
+    }
+
+    .weeks {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .week-card {
+      display: block;
+      text-decoration: none;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      padding: 22px;
+      transition: transform .12s ease, background .12s ease;
+    }
+
+    .week-card:hover {
+      background: var(--panel-strong);
+      transform: translateY(-1px);
+    }
+
+    .week-card:active {
+      transform: translateY(0);
+    }
+
+    .week-num {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .week-name {
+      font-size: 28px;
+      font-weight: 750;
+      letter-spacing: -.02em;
+      margin-bottom: 18px;
+    }
+
+    .week-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .app { border-radius: 24px; padding: 20px; }
+      .topbar { flex-direction: column; }
+      .weeks { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <div>
+        <h1 class="title">Couch to 5K</h1>
+        <div class="subtitle">NHS running plan timers</div>
+      </div>
+
+      <label class="theme-picker" for="themeSelect">
+        Theme
+        <select id="themeSelect" aria-label="Theme">
+          <option value="system">System</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </label>
+    </div>
+
+    <section class="weeks" aria-label="Weeks">
+      <a class="week-card" href="couch_to_5k_week_1.html">
+        <div class="week-num">WEEK 1</div>
+        <div class="week-name">Start here</div>
+        <div class="week-meta">
+          <span>8 × 1:00 runs</span>
+          <span>28:30</span>
+        </div>
+      </a>
+
+      <a class="week-card" href="couch_to_5k_week_2.html">
+        <div class="week-num">WEEK 2</div>
+        <div class="week-name">Build rhythm</div>
+        <div class="week-meta">
+          <span>6 × 1:30 runs</span>
+          <span>29:00</span>
+        </div>
+      </a>
+
+      <a class="week-card" href="couch_to_5k_week_3.html">
+        <div class="week-num">WEEK 3</div>
+        <div class="week-name">Longer intervals</div>
+        <div class="week-meta">
+          <span>1:30 + 3:00 runs</span>
+          <span>25:00</span>
+        </div>
+      </a>
+
+      <a class="week-card" href="couch_to_5k_week_4.html">
+        <div class="week-num">WEEK 4</div>
+        <div class="week-name">More running</div>
+        <div class="week-meta">
+          <span>3:00 + 5:00 runs</span>
+          <span>31:30</span>
+        </div>
+      </a>
+    </section>
+
+    <div class="footer">Choose a week to start your timer.</div>
+  </main>
+
+  <script>
+    const themeSelect = document.getElementById("themeSelect");
+
+    function applyTheme(mode) {
+      if (mode === "system") {
+        const prefersLight =
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: light)").matches;
+        document.documentElement.setAttribute(
+          "data-theme",
+          prefersLight ? "light" : "dark"
+        );
+      } else {
+        document.documentElement.setAttribute("data-theme", mode);
+      }
+    }
+
+    function loadThemePreference() {
+      let saved = "system";
+      try {
+        saved = localStorage.getItem("c25k-theme") || "system";
+      } catch (e) {}
+      themeSelect.value = saved;
+      applyTheme(saved);
+    }
+
+    themeSelect.addEventListener("change", () => {
+      const mode = themeSelect.value;
+      try {
+        localStorage.setItem("c25k-theme", mode);
+      } catch (e) {}
+      applyTheme(mode);
+    });
+
+    if (window.matchMedia) {
+      const mq = window.matchMedia("(prefers-color-scheme: light)");
+      const onSystemThemeChange = () => {
+        if (themeSelect.value === "system") applyTheme("system");
+      };
+      if (mq.addEventListener) mq.addEventListener("change", onSystemThemeChange);
+      else if (mq.addListener) mq.addListener(onSystemThemeChange);
+    }
+
+    loadThemePreference();
+  </script>
+</body>
+</html>

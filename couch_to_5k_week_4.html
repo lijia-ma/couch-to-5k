@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Couch to 5K — Week 4 Timer</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: rgba(255,255,255,.08);
+    --panel-strong: rgba(255,255,255,.12);
+    --text: #f7f8fb;
+    --muted: rgba(247,248,251,.68);
+    --accent: #8dd8ff;
+    --accent2: #b6f0c4;
+    --shadow: 0 24px 80px rgba(0,0,0,.35);
+    --body-a: rgba(80,140,255,.18);
+    --body-b: rgba(95,220,170,.14);
+    --body-c1: #0b1020;
+    --body-c2: #11172a;
+    --body-c3: #0c1223;
+    --app-bg: rgba(11,16,32,.72);
+    --border: rgba(255,255,255,.10);
+    --card-border: rgba(255,255,255,.08);
+    --primary-bg: #f7f8fb;
+    --primary-text: #0c1223;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #f4f7fb;
+    --panel: rgba(20,35,60,.06);
+    --panel-strong: rgba(20,35,60,.10);
+    --text: #152033;
+    --muted: rgba(21,32,51,.64);
+    --accent: #2f7fb8;
+    --accent2: #4d9f6f;
+    --shadow: 0 24px 70px rgba(35,55,85,.16);
+    --body-a: rgba(93,151,221,.18);
+    --body-b: rgba(107,190,147,.15);
+    --body-c1: #f7f9fc;
+    --body-c2: #eef3f8;
+    --body-c3: #f9fbfd;
+    --app-bg: rgba(255,255,255,.78);
+    --border: rgba(30,50,80,.10);
+    --card-border: rgba(30,50,80,.08);
+    --primary-bg: #152033;
+    --primary-text: #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background:
+      radial-gradient(circle at 15% 15%, var(--body-a), transparent 30%),
+      radial-gradient(circle at 85% 20%, var(--body-b), transparent 28%),
+      linear-gradient(160deg, var(--body-c1) 0%, var(--body-c2) 55%, var(--body-c3) 100%);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+
+  .app {
+    width: min(920px, 100%);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    background: var(--app-bg);
+    backdrop-filter: blur(18px);
+    box-shadow: var(--shadow);
+    padding: clamp(22px, 4vw, 42px);
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+
+  .brand {
+    font-weight: 700;
+    letter-spacing: .02em;
+    font-size: clamp(18px, 2vw, 22px);
+  }
+
+  .subtle {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .stage {
+    text-align: center;
+    padding: 28px 12px 18px;
+  }
+
+  .label {
+    font-size: clamp(28px, 5vw, 54px);
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .timer {
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(86px, 20vw, 180px);
+    line-height: .92;
+    font-weight: 800;
+    letter-spacing: -.06em;
+    margin: 6px 0 12px;
+  }
+
+  .next {
+    color: var(--muted);
+    font-size: clamp(16px, 2vw, 20px);
+    min-height: 30px;
+  }
+
+  .timeline-wrap {
+    margin: 30px 0 18px;
+  }
+
+  .timeline-head {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .seek {
+    width: 100%;
+    height: 28px;
+    margin: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .seek-note {
+    margin-top: 6px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  button {
+    appearance: none;
+    border: 0;
+    border-radius: 16px;
+    padding: 16px 20px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text);
+    background: var(--panel);
+    transition: transform .12s ease, background .12s ease;
+  }
+
+  button:hover { background: var(--panel-strong); }
+  button:active { transform: translateY(1px) scale(.995); }
+
+  .primary {
+    background: var(--primary-bg);
+    color: var(--primary-text);
+  }
+  .primary:hover { filter: brightness(1.04); }
+
+  .meta {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 15px 16px;
+  }
+
+  .card .k {
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .card .v {
+    margin-top: 5px;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .options {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+  }
+
+  input[type="checkbox"] {
+    accent-color: #cfeeff;
+    width: 16px;
+    height: 16px;
+  }
+
+  .theme-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .theme-picker select {
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 7px 10px;
+    font: inherit;
+    font-size: 13px;
+  }
+
+  :root[data-theme="light"] .theme-picker select {
+    background: rgba(255,255,255,.9);
+  }
+
+  .done .label { color: var(--accent2); }
+  .done .timer { font-size: clamp(60px, 14vw, 120px); letter-spacing: -.03em; }
+
+  @media (max-width: 640px) {
+    body { padding: 12px; }
+    .app { border-radius: 24px; padding: 20px; }
+    .topbar { align-items: flex-start; flex-direction: column; margin-bottom: 12px; }
+    .stage { padding-top: 18px; }
+    .controls { grid-template-columns: 1fr 1fr; }
+    .controls .primary { grid-column: 1 / -1; }
+    .meta { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <main class="app" id="app">
+    <div class="topbar">
+      <div>
+        <div class="brand">Couch to 5K · Week 4</div>
+        <div class="subtle">NHS Week 4 · 31:30 guided interval timer</div>
+      </div>
+      <div class="subtle" id="clock">Ready</div>
+    </div>
+
+    <section class="stage">
+      <div class="label" id="stageLabel">Warm-up Walk</div>
+      <div class="timer" id="timer">05:00</div>
+      <div class="next" id="nextText">Next: Run · 3:00</div>
+    </section>
+
+    <div class="timeline-wrap">
+      <div class="timeline-head">
+        <span id="segmentText">Segment 1 of 9</span>
+        <span id="totalText">00:00 / 31:30</span>
+      </div>
+      <input
+        id="seekBar"
+        class="seek"
+        type="range"
+        min="0"
+        max="1890"
+        step="1"
+        value="0"
+        aria-label="Workout timeline"
+      />
+          </div>
+
+    <div class="controls">
+      <button class="primary" id="startPause">Start</button>
+      <button id="reset">Reset</button>
+      <button id="fullscreen">Fullscreen</button>
+    </div>
+
+    <div class="meta">
+      <div class="card">
+        <div class="k">Current</div>
+        <div class="v" id="currentMeta">Warm-up walk</div>
+      </div>
+      <div class="card">
+        <div class="k">Up next</div>
+        <div class="v" id="nextMeta">Run · 3:00</div>
+      </div>
+      <div class="card">
+        <div class="k">Remaining</div>
+        <div class="v" id="remainingMeta">31:30</div>
+      </div>
+    </div>
+
+    <div class="options">
+      <label><input type="checkbox" id="soundToggle" checked> Sound cue</label>
+      <label><input type="checkbox" id="wakeToggle" checked> Keep screen awake</label>
+      <label class="theme-picker" for="themeSelect">
+        Theme
+        <select id="themeSelect" aria-label="Theme">
+          <option value="system">System</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </label>
+    </div>
+  </main>
+
+<script>
+(() => {
+  // NHS Couch to 5K Week 4. Total: 31:30
+  const schedule = [
+    {name: "Warm-up Walk", short: "Warm-up walk", seconds: 300},
+    {name: "Run", short: "Run · 3:00", seconds: 180},
+    {name: "Walk", short: "Walk · 1:30", seconds: 90},
+    {name: "Run", short: "Run · 5:00", seconds: 300},
+    {name: "Walk", short: "Walk · 2:30", seconds: 150},
+    {name: "Run", short: "Run · 3:00", seconds: 180},
+    {name: "Walk", short: "Walk · 1:30", seconds: 90},
+    {name: "Run", short: "Final run · 5:00", seconds: 300},
+    {name: "Cool-down Walk", short: "Cool-down walk", seconds: 300}
+  ];
+
+  const totalDuration = schedule.reduce((a, b) => a + b.seconds, 0);
+
+  let index = 0;
+  let remaining = schedule[0].seconds;
+  let elapsed = 0;
+  let running = false;
+  let rafId = null;
+  let lastTick = null;
+  let wakeLock = null;
+  let audioCtx = null;
+  let userSeeking = false;
+
+  const $ = id => document.getElementById(id);
+  const app = $("app");
+  const stageLabel = $("stageLabel");
+  const timer = $("timer");
+  const nextText = $("nextText");
+  const segmentText = $("segmentText");
+  const totalText = $("totalText");
+  const seekBar = $("seekBar");
+  const currentMeta = $("currentMeta");
+  const nextMeta = $("nextMeta");
+  const remainingMeta = $("remainingMeta");
+  const startPause = $("startPause");
+  const resetBtn = $("reset");
+  const fullscreenBtn = $("fullscreen");
+  const soundToggle = $("soundToggle");
+  const wakeToggle = $("wakeToggle");
+  const themeSelect = $("themeSelect");
+  const clock = $("clock");
+
+  const fmt = s => {
+    s = Math.max(0, Math.ceil(s));
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+  };
+
+  function locateAt(time) {
+    let t = Math.max(0, Math.min(totalDuration, time));
+
+    if (t >= totalDuration) {
+      return {
+        index: schedule.length,
+        remaining: 0,
+        elapsed: totalDuration
+      };
+    }
+
+    let cursor = 0;
+    for (let i = 0; i < schedule.length; i++) {
+      const end = cursor + schedule[i].seconds;
+      if (t < end) {
+        return {
+          index: i,
+          remaining: end - t,
+          elapsed: t
+        };
+      }
+      cursor = end;
+    }
+
+    return {
+      index: schedule.length,
+      remaining: 0,
+      elapsed: totalDuration
+    };
+  }
+
+  function seekTo(time) {
+    const pos = locateAt(Number(time));
+    index = pos.index;
+    remaining = pos.remaining;
+    elapsed = pos.elapsed;
+
+    if (index >= schedule.length) {
+      running = false;
+      startPause.textContent = "Start";
+      releaseWakeLock();
+    }
+
+    lastTick = null;
+    render();
+  }
+
+
+  function applyTheme(mode) {
+    if (mode === "system") {
+      const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+      document.documentElement.setAttribute("data-theme", prefersLight ? "light" : "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", mode);
+    }
+  }
+
+  function loadThemePreference() {
+    let saved = "system";
+    try {
+      saved = localStorage.getItem("c25k-theme") || "system";
+    } catch (e) {}
+    themeSelect.value = saved;
+    applyTheme(saved);
+  }
+
+  function render() {
+    seekBar.max = totalDuration;
+    if (!userSeeking) seekBar.value = Math.round(elapsed);
+
+    if (index >= schedule.length) {
+      app.classList.add("done");
+      stageLabel.textContent = "Workout Complete";
+      timer.textContent = "Nice work";
+      nextText.textContent = "31 minutes 30 seconds done.";
+      segmentText.textContent = `${schedule.length} segments complete`;
+      totalText.textContent = "31:30 / 31:30";
+      currentMeta.textContent = "Finished";
+      nextMeta.textContent = "—";
+      remainingMeta.textContent = "00:00";
+      clock.textContent = "Complete";
+      return;
+    }
+
+    app.classList.remove("done");
+    const current = schedule[index];
+    const next = schedule[index + 1];
+
+    stageLabel.textContent = current.name;
+    timer.textContent = fmt(remaining);
+    nextText.textContent = next ? `Next: ${next.name} · ${fmt(next.seconds)}` : "Final segment";
+    segmentText.textContent = `Segment ${index + 1} of ${schedule.length}`;
+    totalText.textContent = `${fmt(elapsed)} / ${fmt(totalDuration)}`;
+    currentMeta.textContent = current.short;
+    nextMeta.textContent = next ? `${next.name} · ${fmt(next.seconds)}` : "Finish";
+    remainingMeta.textContent = fmt(totalDuration - elapsed);
+    clock.textContent = running ? "Running" : (elapsed > 0 ? "Paused" : "Ready");
+  }
+
+  function beep() {
+    if (!soundToggle.checked) return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.22, audioCtx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.28);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    } catch (e) {}
+  }
+
+
+  async function requestWakeLock() {
+    if (!wakeToggle.checked || !("wakeLock" in navigator)) return;
+    try {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; });
+    } catch (e) {}
+  }
+
+  async function releaseWakeLock() {
+    if (wakeLock) {
+      try { await wakeLock.release(); } catch (e) {}
+      wakeLock = null;
+    }
+  }
+
+  function advanceStage() {
+    beep();
+    index++;
+
+    if (index >= schedule.length) {
+      running = false;
+      startPause.textContent = "Start";
+      releaseWakeLock();
+      render();
+      return;
+    }
+
+    remaining = schedule[index].seconds;
+  }
+
+  function tick(ts) {
+    if (!running) return;
+    if (lastTick == null) lastTick = ts;
+
+    let delta = (ts - lastTick) / 1000;
+    lastTick = ts;
+
+    while (delta > 0 && running) {
+      if (remaining > delta) {
+        remaining -= delta;
+        elapsed += delta;
+        delta = 0;
+      } else {
+        elapsed += remaining;
+        delta -= remaining;
+        remaining = 0;
+        advanceStage();
+      }
+    }
+
+    render();
+    if (running) rafId = requestAnimationFrame(tick);
+  }
+
+  async function start() {
+    if (index >= schedule.length) {
+      resetAll();
+    }
+
+    running = true;
+    startPause.textContent = "Pause";
+
+    if (elapsed === 0 && remaining === schedule[0].seconds) {
+      beep();
+    }
+
+    await requestWakeLock();
+    lastTick = null;
+    render();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  async function pause() {
+    running = false;
+    startPause.textContent = "Resume";
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    lastTick = null;
+    await releaseWakeLock();
+    render();
+  }
+
+  function resetAll() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    lastTick = null;
+    index = 0;
+    remaining = schedule[0].seconds;
+    elapsed = 0;
+    startPause.textContent = "Start";
+    releaseWakeLock();
+    render();
+  }
+
+  startPause.addEventListener("click", () => running ? pause() : start());
+  resetBtn.addEventListener("click", resetAll);
+
+  seekBar.addEventListener("pointerdown", () => {
+    userSeeking = true;
+  });
+
+  seekBar.addEventListener("input", () => {
+    seekTo(Number(seekBar.value));
+    userSeeking = true;
+  });
+
+  seekBar.addEventListener("change", () => {
+    userSeeking = false;
+    seekTo(Number(seekBar.value));
+  });
+
+  seekBar.addEventListener("pointerup", () => {
+    userSeeking = false;
+  });
+
+  fullscreenBtn.addEventListener("click", async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        fullscreenBtn.textContent = "Exit Fullscreen";
+      } else {
+        await document.exitFullscreen();
+        fullscreenBtn.textContent = "Fullscreen";
+      }
+    } catch (e) {}
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    fullscreenBtn.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
+  });
+
+  document.addEventListener("visibilitychange", async () => {
+    if (document.visibilityState === "visible" && running && wakeToggle.checked) {
+      await requestWakeLock();
+    }
+  });
+
+
+  themeSelect.addEventListener("change", () => {
+    const mode = themeSelect.value;
+    try { localStorage.setItem("c25k-theme", mode); } catch (e) {}
+    applyTheme(mode);
+  });
+
+  if (window.matchMedia) {
+    const mq = window.matchMedia("(prefers-color-scheme: light)");
+    const onSystemThemeChange = () => {
+      if (themeSelect.value === "system") applyTheme("system");
+    };
+    if (mq.addEventListener) mq.addEventListener("change", onSystemThemeChange);
+    else if (mq.addListener) mq.addListener(onSystemThemeChange);
+  }
+
+  wakeToggle.addEventListener("change", async () => {
+    if (wakeToggle.checked && running) await requestWakeLock();
+    else await releaseWakeLock();
+  });
+
+  loadThemePreference();
+  render();
+})();
+</script>
+</body>
+</html>
